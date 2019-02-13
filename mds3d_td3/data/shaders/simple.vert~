@@ -1,0 +1,22 @@
+#version 330 core
+
+uniform float zoom;
+uniform vec2 translation;
+uniform int wire;
+
+in vec3 vtx_position;
+in vec3 vtx_color;
+
+out vec3 var_color;
+
+void main()
+{
+    if(wire == 1){
+        var_color = vec3(1);
+    }else{
+        var_color = vtx_color;
+    }
+    uint i = floatBitsToUint(zoom) + uint(3);
+    float zoom = uintBitsToFloat(i) + 1;
+    gl_Position = vec4(vec3(-zoom,zoom,-zoom)*vtx_position + vec3(translation,0), 1.);
+}
