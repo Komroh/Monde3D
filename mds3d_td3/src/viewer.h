@@ -17,6 +17,7 @@ public:
 
     // gl stuff
     void init(int w, int h);
+    void drawScene2D();
     void drawScene();
     void updateAndDrawScene();
     void reshape(int w, int h);
@@ -36,6 +37,7 @@ private:
     Shader _shader;
     Mesh   _mesh;
     float _value;
+    float _theta;
     Eigen::Vector2f _translat;
 
     // Mouse parameters for the trackball

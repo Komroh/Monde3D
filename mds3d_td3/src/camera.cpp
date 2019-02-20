@@ -14,7 +14,13 @@ void Camera::lookAt(const Vector3f& position, const Vector3f& target, const Vect
 {
   mTarget = target;
 
-  // TODO
+  auto Zc=(position-target).normalized();
+  auto Xc=up.cross(Zc).normalized();
+  auto Yc=Zc.cross(Xc);
+   mViewMatrix << Xc.x(), Yc.x(), Zc.x(), position.x(),
+                  Xc.y(), Yc.y(), Zc.y(), position.y(),
+                  Xc.z(), Yc.z(), Zc.z(), position.z(),
+                  0, 0, 0, 1;
 }
 
 void Camera::setPerspective(float fovY, float near, float far)

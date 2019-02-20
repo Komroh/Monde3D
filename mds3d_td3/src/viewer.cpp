@@ -4,7 +4,7 @@
 using namespace Eigen;
 
 Viewer::Viewer()
-  : _winWidth(0), _winHeight(0), _value(1.5),_translat(0,0)
+  : _winWidth(0), _winHeight(0), _value(1.5),_translat(0,0), _theta(0)
 {
 }
 
@@ -24,6 +24,7 @@ void Viewer::init(int w, int h){
 
     reshape(w,h);
     _trackball.setCamera(&_cam);
+    //_cam.setPerspective()
     glEnable(GL_DEPTH_TEST);
 }
 
@@ -38,21 +39,77 @@ void Viewer::reshape(int w, int h){
 /*!
    callback to draw graphic primitives
  */
-void Viewer::drawScene()
+void Viewer::drawScene2D()
 {
 
   _shader.activate();
-  glUniform1f(_shader.getUniformLocation("zoom"), _value);
-  glUniform2fv(_shader.getUniformLocation("translation"),1,_translat.data());
+    /*Matrix4f M;
+    M <<    _value, 0, 0, _translat.x(),
+            0, _value, 0, _translat.y(),
+            0, 0, _value, 0,
+            0, 0, 0, 1;
+    Matrix4f M1;
+    M1<<    cos(_theta), -sin(_theta), 0, 0,
+            sin(_theta), cos(_theta), 0, 0,
+            0, 0, 1, 0,
+            0, 0, 0, 1;
+    M=M*M1;*/
+    Matrix4f M;
+    M <<    0.5, 0, 0, -0.5,
+            0, 0.5, 0, -1,
+            0, 0, 0.5, 0,
+            0, 0, 0, 1;
+    glUniformMatrix4fv(_shader.getUniformLocation("mat"), 1, GL_FALSE, M.data());
   _mesh.draw(_shader);
+
+    M <<    -0.5, 0, 0, 0.5,
+            0, 0.5, 0, -1,
+            0, 0, 0.5, 0,
+            0, 0, 0, 1;
+    glUniformMatrix4fv(_shader.getUniformLocation("mat"), 1, GL_FALSE, M.data());
+    _mesh.draw(_shader);
+
+    M<<    cos(_theta), -sin(_theta), 0, 0,
+            sin(_theta), cos(_theta), 0, 0,
+            0, 0, 1, 0,
+            0, 0, 0, 1;
+
+    Matrix4f M1;
+    M1<<    1, 0, 0, 0,
+            0, 1, 0, 0.5,
+            0, 0, 1, 0,
+            0, 0, 0, 1;
+
+    Matrix4f M2;
+    M2<<    1, 0, 0, 0,
+            0, 1, 0, -0.5,
+            0, 0, 1, 0,
+            0, 0, 0, 1;
+    M=M1*M*M2;
+    glUniformMatrix4fv(_shader.getUniformLocation("mat"), 1, GL_FALSE, M.data());
+    _mesh.draw(_shader);
   _shader.deactivate();
 }
+
+void Viewer::drawScene()
+{ //Zc= Pc-T/abs(Pc-T) // Xc=V cross Zc/abs(V cross Zc) // Yc=Zc cross Xc // Mc=(Xc, Yc, Zc, Pc,0,0,0,0)// P'=Pc*Mc-1*Mo*P
+
+    _shader.activate();
+
+
+    auto M=Translation3f(_translat.x(),_translat.y(),0)*AngleAxisf(_theta,Vector3f::UnitY());
+    glUniformMatrix4fv(_shader.getUniformLocation("mat"), 1, GL_FALSE, M.matrix().data());
+    _mesh.draw(_shader);
+    _shader.deactivate();
+}
+
 
 
 void Viewer::updateAndDrawScene()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glClearColor(0.5, 0.5, 0.5, 1);
+    //drawScene2D();
     drawScene();
 }
 
@@ -107,7 +164,16 @@ void Viewer::keyPressed(int key, int action, int /*mods*/)
     {
         _value*=0.9;
     }
+    else if (key==GLFW_KEY_S)
+    {
+        _theta+=0.1;
+    }
+    else if (key==GLFW_KEY_D)
+    {
+        _theta-=0.1;
+    }
 }
+
 
 /*!
    callback to manage mouse : called when user press or release mouse button
