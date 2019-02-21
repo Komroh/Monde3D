@@ -17,10 +17,10 @@ void Camera::lookAt(const Vector3f& position, const Vector3f& target, const Vect
   auto Zc=(position-target).normalized();
   auto Xc=up.cross(Zc).normalized();
   auto Yc=Zc.cross(Xc);
-   mViewMatrix << Xc.x(), Yc.x(), Zc.x(), position.x(),
-                  Xc.y(), Yc.y(), Zc.y(), position.y(),
-                  Xc.z(), Yc.z(), Zc.z(), position.z(),
+   mViewMatrix << Xc, Yc, Zc, position,
                   0, 0, 0, 1;
+
+   mViewMatrix=mViewMatrix.inverse();
 }
 
 void Camera::setPerspective(float fovY, float near, float far)
@@ -44,7 +44,8 @@ void Camera::zoom(float x)
 
 void Camera::rotateAroundTarget(float angle, Vector3f axis)
 {
-  // TODO
+  auto Tr=Affine3f(mViewMatrix)*Translation3f(mTarget);
+  mViewMatrix=Affine3f(Tr*AngleAxisf(angle,axis)*Tr.inverse())*mViewMatrix;
 }
 
 Camera::~Camera()
@@ -73,3 +74,4 @@ Matrix4f Camera::projectionMatrix() const
 
   return projMat;
 }
+

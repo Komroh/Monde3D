@@ -26,6 +26,7 @@ class Camera
     Eigen::Matrix4f projectionMatrix() const;
     
     void setViewport(int width, int height);
+
     
     int vpWidth() const { return mVpWidth; }
     int vpHeight() const { return mVpHeight; }

@@ -19,22 +19,23 @@ Viewer::~Viewer()
 void Viewer::init(int w, int h){
     loadShaders();
 
-    if(!_mesh.load(DATA_DIR"/models/lemming.off")) exit(1);
+    if(!_mesh.load(DATA_DIR"/models/monkey.obj")) exit(1);
     _mesh.initVBA();
 
     reshape(w,h);
     _trackball.setCamera(&_cam);
-    //_cam.setPerspective()
+
     glEnable(GL_DEPTH_TEST);
 }
 
-void Viewer::reshape(int w, int h){
+void Viewer::reshape(int w, int h) {
     _winWidth = w;
     _winHeight = h;
-    _cam.setViewport(w,h);
+    _cam.setViewport(w, h);
     glViewport(0, 0, _winWidth, _winHeight);
-}
 
+    _cam.lookAt(Vector3f(1, 0, 0), Vector3f(0, 0, 0), Vector3f(0, 1, 0));
+}
 
 /*!
    callback to draw graphic primitives
@@ -92,12 +93,14 @@ void Viewer::drawScene2D()
 }
 
 void Viewer::drawScene()
-{ //Zc= Pc-T/abs(Pc-T) // Xc=V cross Zc/abs(V cross Zc) // Yc=Zc cross Xc // Mc=(Xc, Yc, Zc, Pc,0,0,0,0)// P'=Pc*Mc-1*Mo*P
+{
 
     _shader.activate();
 
 
-    auto M=Translation3f(_translat.x(),_translat.y(),0)*AngleAxisf(_theta,Vector3f::UnitY());
+    auto A=Translation3f(_translat.x(),_translat.y(),0)*AngleAxisf(_theta,Vector3f::UnitY());
+    auto M=_cam.projectionMatrix()*_cam.viewMatrix()*A;
+
     glUniformMatrix4fv(_shader.getUniformLocation("mat"), 1, GL_FALSE, M.matrix().data());
     _mesh.draw(_shader);
     _shader.deactivate();
