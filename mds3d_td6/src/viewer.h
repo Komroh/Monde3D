@@ -18,6 +18,7 @@ public:
     // gl stuff
     void init(int w, int h);
     void drawScene();
+    void drawSceneFilter();
     void updateAndDrawScene();
     void reshape(int w, int h);
     void loadShaders();
@@ -35,6 +36,12 @@ private:
     Camera _cam;
     Shader _shader;
     Mesh   _mesh;
+    GLuint _tex;
+    GLuint _tex2;
+    GLuint _tex3;
+    GLuint _sampleId;
+    GLenum _minFilter= GL_NEAREST;
+    GLenum _magFilter= GL_NEAREST;
 
     float _theta;
     bool _rotate;
