@@ -25,10 +25,10 @@ void Viewer::init(int w, int h){
     // Load Texture
 
     _tex = SOIL_load_OGL_texture(DATA_DIR"/textures/earth.jpg",4,0,SOIL_FLAG_INVERT_Y );
-    _tex2 = SOIL_load_OGL_texture(DATA_DIR"/textures/checkerboard.png",4,0,SOIL_FLAG_INVERT_Y );
-    _tex3 = SOIL_load_OGL_texture(DATA_DIR"/textures/earth_night.jpg",4,0,SOIL_FLAG_INVERT_Y );
+    _tex2 = SOIL_load_OGL_texture(DATA_DIR"/textures/normals.png",4,0,SOIL_FLAG_INVERT_Y );
+    _tex3 = SOIL_load_OGL_texture(DATA_DIR"/textures/diffuse.png",4,0,SOIL_FLAG_INVERT_Y );
     loadShaders();
-    if(!_mesh.load(DATA_DIR"/models/plane.obj")) exit(1);
+    if(!_mesh.load(DATA_DIR"/models/earth2.obj")) exit(1);
     _mesh.initVBA();
 
     reshape(w,h);
@@ -135,11 +135,55 @@ _mesh.draw(_shader);
 _shader.deactivate();
 }
 
+void Viewer::drawSceneNormal()
+{
+// configure the rendering target size (viewport)
+    glViewport(0, 0, _winWidth, _winHeight);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    _shader.activate();
+
+    glUniformMatrix4fv(_shader.getUniformLocation("view_mat"),1,GL_FALSE,_cam.viewMatrix().data());
+    glUniformMatrix4fv(_shader.getUniformLocation("proj_mat"),1,GL_FALSE,_cam.projectionMatrix().data());
+
+
+    Affine3f M(AngleAxisf(_theta,Vector3f(0,1,0)));
+
+    glUniformMatrix4fv(_shader.getUniformLocation("obj_mat"),1,GL_FALSE,M.matrix().data());
+
+    Matrix4f matLocal2Cam = _cam.viewMatrix() * M.matrix();
+    Matrix3f matN = matLocal2Cam.topLeftCorner<3,3>().inverse().transpose();
+    glUniformMatrix3fv(_shader.getUniformLocation("normal_mat"),1,GL_FALSE,matN.data());
+
+    Vector3f lightDir = Vector3f(1,0,1).normalized();
+    lightDir = (matLocal2Cam.topLeftCorner<3,3>() * lightDir).normalized();
+    glUniform3fv(_shader.getUniformLocation("lightDir"),1,lightDir.data());
+
+
+    glSamplerParameteri(_sampleId,GL_TEXTURE_MIN_FILTER,(GLint)_minFilter);
+    glSamplerParameteri(_sampleId,GL_TEXTURE_MAG_FILTER,(GLint)_magFilter);
+
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D,_tex2);
+    glBindSampler(1,_sampleId);
+    glUniform1i(_shader.getUniformLocation("tex2D_2"), 1);
+
+   /* glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D,_tex3);
+    glBindSampler(2,_sampleId);
+    glUniform1i(_shader.getUniformLocation("tex2D_3"), 2);*/
+
+    _mesh.draw(_shader);
+
+    _shader.deactivate();
+}
+
+
 void Viewer::updateAndDrawScene()
 {
   if(_rotate)
     _theta += 0.01*M_PI;
-  drawSceneFilter();
+  drawSceneNormal();
 }
 
 void Viewer::loadShaders()

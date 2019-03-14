@@ -46,11 +46,13 @@ protected:
     struct Vertex
     {
       Vertex(const Vector3f& pos = Vector3f::Zero(), const Vector3f& n = Vector3f::Zero())
-        : position(pos), normal(n), color(Vector4f(0.6,0.6,0.6,1.0)), texcoord(Vector2f::Zero())
+        : position(pos), normal(n),tangente(n),bitangente(n), color(Vector4f(0.6,0.6,0.6,1.0)), texcoord(Vector2f::Zero())
       {}
       
       Vector3f position;
       Vector3f normal;
+      Vector3f tangente;
+      Vector3f bitangente;
       Vector4f color;
       Vector2f texcoord;
     };

@@ -8,6 +8,8 @@ uniform mat3 normal_mat;
 in vec3 vtx_position;
 in vec3 vtx_color;
 in vec3 vtx_normal;
+in vec3 vtx_tangent;
+in vec3 vtx_bitangent;
 in vec2 vtx_texcoord;
 
 out vec3 v_normal;
@@ -18,7 +20,7 @@ out vec2 v_texcoord;
 void main()
 {
   v_color = vtx_color;
-  v_normal = normalize(normal_mat * vtx_normal);
+  v_normal =  vtx_normal;
   vec4 p = view_mat * (obj_mat * vec4(vtx_position, 1.));
   v_view = normalize(-p.xyz);
   v_texcoord=vtx_texcoord;

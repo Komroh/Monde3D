@@ -19,6 +19,7 @@ public:
     void init(int w, int h);
     void drawScene();
     void drawSceneFilter();
+    void drawSceneNormal();
     void updateAndDrawScene();
     void reshape(int w, int h);
     void loadShaders();
