@@ -28,6 +28,7 @@ void Viewer::init(int w, int h){
 
     _texid = SOIL_load_OGL_texture(DATA_DIR"/textures/rainbow.png", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS);
 
+
     if( 0 == _texid )
     {
         printf( "SOIL loading error: '%s'\n", SOIL_last_result() );
